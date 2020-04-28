@@ -3,6 +3,7 @@ package com.cursoandroid.flappybird;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -10,6 +11,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.Random;
 
@@ -29,8 +33,8 @@ public class FlappyBird extends ApplicationAdapter {
 	private Rectangle retanguloCanoTopo;
 
 	//Atributos de Configuração
-	private int larguraDispositivo;
-	private int alturaDispositivo;
+	private float larguraDispositivo;
+	private float alturaDispositivo;
 	private float deltaTime;
 	private Random numeroRandomico;
 	private int alturaEntreCanosRandom;
@@ -45,6 +49,12 @@ public class FlappyBird extends ApplicationAdapter {
 	private float espacoCanos;
 	private int estadoJogo = 0;
 
+	//Camera
+	private OrthographicCamera camera;
+	private Viewport viewport;
+	private final float VIRTUAL_WIDTH = 768;
+	private final float VIRTUAL_HEIGHT = 1024;
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
@@ -54,6 +64,8 @@ public class FlappyBird extends ApplicationAdapter {
 
 	@Override
 	public void render () {
+		batch.setProjectionMatrix(camera.combined);
+
 		batch.begin();
 		deltaTime = Gdx.graphics.getDeltaTime();
 
@@ -71,7 +83,6 @@ public class FlappyBird extends ApplicationAdapter {
 					verificarPontuacao();
 				}
 		}
-
 		//Chamando as texturas com parâmetros
 		batch.draw(fundo, 0,0, larguraDispositivo, alturaDispositivo);
 		batch.draw(passaros[(int) variacao], 100, posicaoInicialVertical);
@@ -80,15 +91,19 @@ public class FlappyBird extends ApplicationAdapter {
 		fonte.draw(batch, String.valueOf(score), larguraDispositivo/2, alturaDispositivo - 100);
 
 		if (estadoJogo == 2){
-			batch.draw(gameOver, 0, 0);
+			batch.draw(gameOver, larguraDispositivo/2 - 200, alturaDispositivo/2);
 		}
-
 		//FINALIZANDO A RENDERIZAÇÃO
 		batch.end();
 
 		desenharFormas();
 
 		detectarColisoes();
+	}
+
+	@Override
+	public void resize(int width, int height){
+		viewport.update(width, height);
 	}
 
 	private void inicializarTexturas(){
@@ -120,9 +135,14 @@ public class FlappyBird extends ApplicationAdapter {
 
 	private void inicializarConfiguracoes(){
 		//Dispositivo
-		larguraDispositivo = Gdx.graphics.getWidth();
-		alturaDispositivo = Gdx.graphics.getHeight();
+		larguraDispositivo = VIRTUAL_WIDTH;
+		alturaDispositivo = VIRTUAL_HEIGHT;
 		numeroRandomico = new Random();
+
+		//CAMERA
+		camera = new OrthographicCamera();
+		camera.position.set(VIRTUAL_WIDTH/2, VIRTUAL_HEIGHT/2, 0);
+		viewport = new StretchViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
 
 		//Posição do Pássaro
 		posicaoInicialVertical = alturaDispositivo/2;
@@ -131,7 +151,7 @@ public class FlappyBird extends ApplicationAdapter {
 		posicaoMovimentoCanoHorizontal = larguraDispositivo - 100;
 
         //Espaçamento Entre Canos
-        espacoCanos = 300;
+        espacoCanos = 250;
 	}
 
 	private void configPassaroTexturas(){
