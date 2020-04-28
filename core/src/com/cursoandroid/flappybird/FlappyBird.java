@@ -21,18 +21,21 @@ public class FlappyBird extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private ShapeRenderer shape;
 
-	//Declaração das Texturas
+	//Texturas
 	private Texture[] passaros;
 	private Texture fundo;
 	private Texture canoBaixo;
 	private Texture canoTopo;
 	private Texture gameOver;
-	private BitmapFont fonte;
 	private Circle passaroCirculo;
 	private Rectangle retanguloCanoBaixo;
 	private Rectangle retanguloCanoTopo;
 
-	//Atributos de Configuração
+	//Fontes
+	private BitmapFont fonte;
+	private BitmapFont mensagem;
+
+	//Configurações
 	private float larguraDispositivo;
 	private float alturaDispositivo;
 	private float deltaTime;
@@ -41,7 +44,7 @@ public class FlappyBird extends ApplicationAdapter {
 	private int score = 0;
 	private boolean marcouPonto;
 
-	//Configurações de Movimento
+	//Movimentos e Estados
 	private float variacao = 0;
 	private float velocidadeQueda = 0;
 	private float posicaoInicialVertical;
@@ -49,7 +52,7 @@ public class FlappyBird extends ApplicationAdapter {
 	private float espacoCanos;
 	private int estadoJogo = 0;
 
-	//Camera
+	//Câmera
 	private OrthographicCamera camera;
 	private Viewport viewport;
 	private final float VIRTUAL_WIDTH = 768;
@@ -81,6 +84,10 @@ public class FlappyBird extends ApplicationAdapter {
 					configPassaroTexturas();
 					if (Gdx.input.justTouched()) velocidadeQueda = -15;
 					verificarPontuacao();
+				} else {
+					if (Gdx.input.justTouched()){
+						reiniciarGame();
+					}
 				}
 		}
 		//Chamando as texturas com parâmetros
@@ -92,6 +99,7 @@ public class FlappyBird extends ApplicationAdapter {
 
 		if (estadoJogo == 2){
 			batch.draw(gameOver, larguraDispositivo/2 - 200, alturaDispositivo/2);
+			mensagem.draw(batch, "Toque para Reiniciar!", larguraDispositivo/2 - 200, alturaDispositivo/2 - gameOver.getHeight()/2 );
 		}
 		//FINALIZANDO A RENDERIZAÇÃO
 		batch.end();
@@ -125,6 +133,9 @@ public class FlappyBird extends ApplicationAdapter {
 		fonte = new BitmapFont();
 		fonte.setColor(Color.WHITE);
 		fonte.getData().setScale(6);
+		mensagem = new BitmapFont();
+		mensagem.setColor(Color.WHITE);
+		mensagem.getData().setScale(3);
 
 		//Inicialização do Game Over
 		gameOver = new Texture("game_over.png");
@@ -226,5 +237,13 @@ public class FlappyBird extends ApplicationAdapter {
 		if (Intersector.overlaps(passaroCirculo, retanguloCanoBaixo) || Intersector.overlaps(passaroCirculo, retanguloCanoTopo)){
 			estadoJogo = 2;
 		}
+	}
+
+	private void reiniciarGame(){
+		estadoJogo = 0;
+		score = 0;
+		velocidadeQueda = 0;
+		posicaoInicialVertical = alturaDispositivo/2;
+		posicaoMovimentoCanoHorizontal = larguraDispositivo;
 	}
 }
